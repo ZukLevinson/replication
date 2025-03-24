@@ -1,4 +1,6 @@
-export type Page<T> = {
-  updates: T[];
+import { Entity } from './entity';
+
+export type Page<ENTITY extends Entity> = {
+  updates: ENTITY[];
   deletes: string[];
 };

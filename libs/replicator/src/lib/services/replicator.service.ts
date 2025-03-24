@@ -1,7 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ReplicatorConfig } from '../models';
 import { MODULE_OPTIONS_TOKEN } from '../replicator.module-definition';
-import { ContinuousEntity, Interaction, Page } from '@replication/models';
+import {
+  ContinuousEntity,
+  Entity,
+  Interaction,
+  Page,
+} from '@replication/models';
 import { ContinuityService } from '../../continuity/services';
 
 @Injectable()
@@ -11,12 +16,14 @@ export class ReplicatorService {
     private readonly continuityService: ContinuityService
   ) {}
 
-  async onPage<T>(page: Page<T>): Promise<Interaction> {
+  async onPage<ENTITY extends Entity>(
+    page: Page<ENTITY>
+  ): Promise<Interaction> {
     const upsertContinuousEntities =
-      this.convertPageIntoContinuityEntities(page);
+      await this.convertPageIntoContinuityEntities(page);
 
     const upsertInteraction =
-      await this.config.saveToDatabase.upsertEntities<T>(
+      await this.config.saveToDatabase.upsertEntities<ENTITY>(
         upsertContinuousEntities
       );
 
@@ -27,11 +34,10 @@ export class ReplicatorService {
     return this.combineInteractions(upsertInteraction, deleteInteraction);
   }
 
-  private convertPageIntoContinuityEntities<T>(
-    page: Page<T>
-  ): ContinuousEntity<T>[] {
-    //TODO: continue
-    return [];
+  private convertPageIntoContinuityEntities<ENTITY extends Entity>(
+    page: Page<ENTITY>
+  ): Promise<ContinuousEntity<ENTITY>[]> {
+    return this.continuityService.createContinuityEntities(page.updates);
   }
 
   private combineInteractions(

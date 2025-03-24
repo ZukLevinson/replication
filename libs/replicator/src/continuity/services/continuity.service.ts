@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ContinuousEntity } from '@replication/models';
+import { ContinuousEntity, Entity } from '@replication/models';
 import { ContinuityConfig, VersionUpdate } from '../models';
 import { MODULE_OPTIONS_TOKEN } from '../continuity.module-definition';
 import * as moment from 'moment';
@@ -16,18 +16,18 @@ export class ContinuityService {
     @Inject(MODULE_OPTIONS_TOKEN) private readonly config: ContinuityConfig
   ) {}
 
-  async createContinuityEntity<T>(
-    id: string,
-    entity: T
-  ): Promise<ContinuousEntity<T>> {
+  async createContinuityEntities<ENTITY extends Entity>(
+    entities: ENTITY[]
+  ): Promise<ContinuousEntity<ENTITY>[]> {
     const latestVersion = await this.getLatestVersion();
+    const updatedAt = moment().toISOString();
 
-    return {
-      id,
+    return entities.map((entity) => ({
+      id: entity.id,
       entity,
-      lastUpdatedAt: moment().toISOString(),
       typeVersion: latestVersion,
-    };
+      lastUpdatedAt: updatedAt,
+    }));
   }
 
   private async updateLatestVersionFromRemote() {
