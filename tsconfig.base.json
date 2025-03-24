@@ -15,6 +15,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@replication/models": ["libs/models/src/index.ts"],
       "@replication/replicator": ["libs/replicator/src/index.ts"]
     }
   },
