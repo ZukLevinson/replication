@@ -1,0 +1,20 @@
+{
+  "name": "replicator",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/replicator/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/replicator",
+        "tsConfig": "libs/replicator/tsconfig.lib.json",
+        "packageJson": "libs/replicator/package.json",
+        "main": "libs/replicator/src/index.ts",
+        "assets": ["libs/replicator/*.md"]
+      }
+    }
+  }
+}
