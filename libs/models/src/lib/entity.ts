@@ -1,16 +1,7 @@
 export type ContinuousEntity<ENTITY> = {
-  metadata: {
-    id: string;
-    entity: ENTITY;
-  };
+  id: string;
+  entity: ENTITY;
+  typeVersion: number;
 
-  dates: {
-    lastUpdatedAt: string;
-    createdAt: string;
-  };
-
-  continuity: {
-    pastEntities: ContinuousEntity<unknown>[];
-    entityVersion: number;
-  };
+  lastUpdatedAt: string;
 };
