@@ -6,12 +6,12 @@ import {
   isParseConfigAsync,
   ParsingResult,
   SyncParseMethod,
-} from '../../models';
-import { MODULE_OPTIONS_TOKEN } from '../data-fetch-engine.module-definition';
+} from '../../../models';
+import { MODULE_OPTIONS_TOKEN } from '../../data-fetch-engine.module-definition';
 import { map, Observable, of, take } from 'rxjs';
 
 @Injectable()
-export class RequestHandlingService<
+export class ParsingService<
   OriginalEntity extends object,
   ParsedEntity extends object,
   ParseDatasource = object[],

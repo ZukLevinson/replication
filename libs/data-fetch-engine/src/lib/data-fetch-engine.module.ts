@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
-import { RequestHandlingService } from './services/request-handling.service';
 import { DataFetchingService } from './services/data-fetching.service';
 import { ConfigurableModuleClass } from './data-fetch-engine.module-definition';
+import { RequestHandlingModule } from './request-handling/request-handling.module';
 
 @Module({
   controllers: [],
-  providers: [RequestHandlingService, DataFetchingService],
+  providers: [DataFetchingService],
   exports: [],
+  imports: [RequestHandlingModule],
 })
 export class DataFetchEngineModule extends ConfigurableModuleClass {}
