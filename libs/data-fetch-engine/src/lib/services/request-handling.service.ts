@@ -1,8 +1,10 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import {
   AsyncParseMethod,
   DataFetchEngineConfig,
+  EntityParsingFailure,
   isParseConfigAsync,
+  ParsingResult,
   SyncParseMethod,
 } from '../../models';
 import { MODULE_OPTIONS_TOKEN } from '../data-fetch-engine.module-definition';
@@ -24,12 +26,13 @@ export class RequestHandlingService<
       ParsedEntity,
       ParseDatasource,
       FilterDatasource
-    >
+    >,
+    private readonly logger: Logger
   ) {}
 
   public parseEntities(
     originalEntities: OriginalEntity[]
-  ): Observable<ParsedEntity[]> {
+  ): Observable<ParsingResult<OriginalEntity, ParsedEntity>> {
     if (isParseConfigAsync(this.parseConfig)) {
       return this.asyncParseEntities(
         originalEntities,
@@ -51,23 +54,65 @@ export class RequestHandlingService<
       ParseDatasource
     >,
     datasource: Observable<ParseDatasource>
-  ): Observable<ParsedEntity[]> {
+  ): Observable<ParsingResult<OriginalEntity, ParsedEntity>> {
     return datasource.pipe(
       take(1),
-      map((datasource) =>
-        originalEntities.map((entity) =>
-          parsingMethod(entity, datasource, originalEntities)
-        )
-      )
+      map((datasource) => {
+        const parsedEntities: ParsedEntity[] = [];
+        const failedEntities: EntityParsingFailure<OriginalEntity>[] = [];
+
+        for (const entity of originalEntities) {
+          try {
+            const parsedEntity = parsingMethod(
+              entity,
+              datasource,
+              originalEntities
+            );
+
+            parsedEntities.push(parsedEntity);
+          } catch (exception) {
+            this.logger.warn('failed to parse entity asynchronously', {
+              entity: entity,
+              exception,
+            });
+
+            failedEntities.push({ entity, exception });
+          }
+        }
+
+        return {
+          parsedEntities,
+          failedEntities,
+        };
+      })
     );
   }
 
   private syncParseEntities(
     originalEntities: OriginalEntity[],
     parsingMethod: SyncParseMethod<OriginalEntity, ParsedEntity>
-  ): ParsedEntity[] {
-    return originalEntities.map((entity) =>
-      parsingMethod(entity, originalEntities)
-    );
+  ): ParsingResult<OriginalEntity, ParsedEntity> {
+    const parsedEntities: ParsedEntity[] = [];
+    const failedEntities: EntityParsingFailure<OriginalEntity>[] = [];
+
+    for (const entity of originalEntities) {
+      try {
+        const parsedEntity = parsingMethod(entity, originalEntities);
+
+        parsedEntities.push(parsedEntity);
+      } catch (exception) {
+        this.logger.warn('failed to parse entity synchronously', {
+          entity: entity,
+          exception,
+        });
+
+        failedEntities.push({ entity, exception });
+      }
+    }
+
+    return {
+      parsedEntities,
+      failedEntities,
+    };
   }
 }
