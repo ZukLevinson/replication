@@ -15,6 +15,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@replication/data-fetch-engine": ["libs/data-fetch-engine/src/index.ts"],
       "@replication/models": ["libs/models/src/index.ts"],
       "@replication/replicator": ["libs/replicator/src/index.ts"]
     }
